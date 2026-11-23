@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bakewell Tart - Cook</title>
-    <link rel="icon" type="image/x-icon" href="/recipes/static/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/recipes/static/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/recipes/static/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/recipes/static/apple-touch-icon.png">
-    <link rel="manifest" href="/recipes/static/site.webmanifest">
+    <link rel="icon" type="image/x-icon" href="../../static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../static/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../static/apple-touch-icon.png">
+    <link rel="manifest" href="../../static/site.webmanifest">
     
-    <link href="/recipes/static/css/output.css" rel="stylesheet">
+    <link href="../../static/css/output.css" rel="stylesheet">
     <script>
         // Check for saved theme preference, or check for prefers-color-scheme, or default to light
         const theme = localStorage.getItem('theme')
@@ -68,7 +68,7 @@
             }
 
             /* Hide all navigation links */
-            a[href="/recipes/"] {
+            a[href="../../"] {
                 display: none !important;
             }
 
@@ -248,8 +248,8 @@
         <nav class="nav-card relative">
             <div class="px-3 lg:px-6 py-4 relative">
                 <div class="flex items-center justify-between flex-wrap gap-y-3">
-                    <a href="/recipes/index.html" class="order-1 hidden md:flex items-center space-x-2">
-                        <img src="/recipes/static/android-chrome-192x192.png" alt="Cook" class="brand-mark h-8 w-8 rounded-md" width="32" height="32">
+                    <a href="../../index.html" class="order-1 hidden md:flex items-center space-x-2">
+                        <img src="../../static/android-chrome-192x192.png" alt="Cook" class="brand-mark h-8 w-8 rounded-md" width="32" height="32">
                     </a>
 
                     <div class="relative z-50 order-2 flex-1 min-w-0 mr-2 md:ml-2 md:mr-4" id="search-container">
@@ -275,7 +275,7 @@
                     <div class="order-3 flex items-center gap-1 lg:gap-2">
                         
                         <div class="hidden md:flex items-center gap-1 mr-2 lg:mr-4">
-                            <a href="/recipes/index.html"
+                            <a href="../../index.html"
                                class="nav-pill active">
                                 Recipes
                             </a>
@@ -308,7 +308,7 @@
                             </button>
                             <div id="more-dropdown" class="hidden absolute right-0 mt-2 w-56 card shadow-[var(--shadow-overlay)] z-50 py-1">
                                 
-                                <a href="/recipes/index.html" class="menu-item active">
+                                <a href="../../index.html" class="menu-item active">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M5 3.5h12a2 2 0 0 1 2 2V21H7a3 3 0 0 1-3-3V5a1.5 1.5 0 0 1 1.5-1.5Z"/>
@@ -345,12 +345,12 @@
 <div>
     <nav class="mb-4 breadcrumb print:hidden">
         <ol class="flex items-center space-x-2 text-sm text-muted">
-            <li><a href="/recipes/index.html" class="hover:text-text">Recipes</a></li>
+            <li><a href="../../index.html" class="hover:text-text">Recipes</a></li>
             
             <li class="flex items-center">
                 <span class="mx-2 text-faint">/</span>
                 
-                    <a href="/recipes/directory/Sweet.html" class="hover:text-text">Sweet</a>
+                    <a href="../../directory/Sweet.html" class="hover:text-text">Sweet</a>
                 
             </li>
             
@@ -385,7 +385,7 @@
                     <span class="hidden lg:inline">Cook</span>
                 </button>
                 
-                <a href="/recipes/recipe/Sweet/Bakewell Tart.cook" download class="btn" title="Download .cook source">
+                <a href="../../recipe/Sweet/Bakewell Tart.cook" download class="btn" title="Download .cook source">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
                     </svg>
@@ -1045,13 +1045,13 @@
     </script>
 
     
-    <script>window.__PREFIX__ = "/recipes";</script>
-    <script src="/recipes/static/js/search.js"></script>
+    <script>window.__PREFIX__ = "../..";</script>
+    <script src="../../static/js/search.js"></script>
     
 
     <!-- URL prefix for JavaScript -->
     <script>
-        window.__PREFIX__ = "/recipes";
+        window.__PREFIX__ = "../..";
         window.__STATIC_MODE__ = true;
         window.__STRINGS__ = { close: "Close" };
         // Bring the visitor back to this page after signing in.
@@ -1066,7 +1066,7 @@
     </script>
 
     <!-- Keyboard shortcuts -->
-    <script src="/recipes/static/js/keyboard-shortcuts.js"></script>
+    <script src="../../static/js/keyboard-shortcuts.js"></script>
     <!-- Expose showShortcutsHelp globally for the help button -->
     <script>
         // showShortcutsHelp is defined in keyboard-shortcuts.js
@@ -1079,9 +1079,9 @@
     </script>
 
     
-<link rel="stylesheet" href="/recipes/static/css/cooking-mode.css">
-<script src="/recipes/static/js/cooking-mode.js"></script>
-<script src="/recipes/static/js/timers.js"></script>
+<link rel="stylesheet" href="../../static/css/cooking-mode.css">
+<script src="../../static/js/cooking-mode.js"></script>
+<script src="../../static/js/timers.js"></script>
 
 </body>
 </html>
