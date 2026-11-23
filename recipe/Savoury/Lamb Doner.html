@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en-US" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lamb Doner - Cook</title>
+    <link rel="icon" type="image/x-icon" href="/recipes/static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/recipes/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/recipes/static/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/recipes/static/apple-touch-icon.png">
+    <link rel="manifest" href="/recipes/static/site.webmanifest">
+    
+    <link href="/recipes/static/css/output.css" rel="stylesheet">
+    <script>
+        // Check for saved theme preference, or check for prefers-color-scheme, or default to light
+        const theme = localStorage.getItem('theme')
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        // False for a guest, or a role below shopper, on a server that requires signing in.
+        window.__CAN_EDIT_LISTS__ = true;
+        // `--recipes-only` and nobody signed in: no shopping list or pantry.
+        window.__RECIPES_ONLY__ = false;
+    </script>
+    
+    <style>
+        .viewport {
+            width: 100%;
+            max-width: 72rem;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Search result keyboard selection. --surface-sunk alone is barely
+           visible against --surface in dark mode, so the accent bar carries
+           the signal. */
+        #search-results a.search-selected {
+            background: var(--accent-soft);
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        @media print {
+            /* Token values are reset to light in input.css; this resets the
+               browser's own defaults so unstyled text is dark too. */
+            html.dark, html {
+                color-scheme: light !important;
+            }
+
+            * {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .viewport {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Hide navigation and non-essential elements */
+            nav, #search-container, #search-input, #search-results, .print\:hidden, .breadcrumb {
+                display: none !important;
+            }
+
+            /* Hide all navigation links */
+            a[href="/recipes/"] {
+                display: none !important;
+            }
+
+            /* Recipe layout for print: one column */
+            .grid {
+                display: block !important;
+            }
+
+            .md\:col-span-1, .md\:col-span-2 {
+                page-break-inside: avoid;
+                width: 100% !important;
+            }
+
+            /* Square corners on paper */
+            .card, .step-box, .ingredient-row, .recipe-note, .rounded-xl {
+                border-radius: 0 !important;
+            }
+
+            /* Step numbers */
+            .step-number {
+                background: #000 !important;
+                color: #fff !important;
+            }
+
+            /* Images */
+            img {
+                max-height: 300px !important;
+                max-width: 100% !important;
+                height: auto !important;
+                object-fit: contain !important;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+            }
+
+            /* Recipe sections on same page if possible */
+            h2, h3 {
+                page-break-after: avoid;
+            }
+
+            ol, ul {
+                page-break-inside: avoid;
+            }
+
+            /* Compact spacing */
+            .mb-8, .mb-6, .mb-4 {
+                margin-bottom: 0.5rem !important;
+            }
+
+            .p-6 {
+                padding: 0.5rem !important;
+            }
+
+            /* Recipe header */
+            h1 {
+                color: #000 !important;
+                font-size: 1.5rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Shopping list print styles */
+            .lg\:w-2\/5, .xl\:w-1\/3 {
+                display: none !important;
+            }
+
+            #shopping-list-results {
+                font-size: 11pt !important;
+                line-height: 1.2 !important;
+            }
+
+            #shopping-list-results input[type="checkbox"] {
+                display: none !important;
+            }
+
+            #shopping-list-results li .flex-1 {
+                width: auto !important;
+                flex: 1 1 0% !important;
+            }
+
+            #shopping-list-results label {
+                cursor: default !important;
+            }
+
+            #shopping-list-results h2 {
+                font-size: 11pt !important;
+                color: #000 !important;
+                margin-bottom: 0 !important;
+            }
+
+            #shopping-list-results .space-y-2 > * + *,
+            #shopping-list-results ul > * + * {
+                margin-top: 0 !important;
+            }
+
+            #shopping-list-results li {
+                padding: 0 !important;
+                line-height: 1.3 !important;
+                border-bottom: 1px dotted #ccc;
+            }
+
+            #shopping-list-results .card {
+                margin-bottom: 0.15rem !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+
+            /* Menu print styles */
+            #menu-content {
+                font-size: 10pt !important;
+                line-height: 1.4 !important;
+            }
+
+            #menu-content h1 {
+                font-size: 14pt !important;
+                margin-bottom: 0.25rem !important;
+                color: #000 !important;
+            }
+
+            #menu-content .space-y-6 > * + * {
+                margin-top: 0.3rem !important;
+            }
+
+            #menu-content .menu-section {
+                border: 1px solid #ccc !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid;
+            }
+
+            #menu-content .menu-section-header {
+                background: #eee !important;
+                color: #000 !important;
+                padding: 0.15rem 0.5rem !important;
+            }
+
+            #menu-content .menu-section-header h2 {
+                font-size: 11pt !important;
+                color: #000 !important;
+            }
+
+            #menu-content .menu-section-body {
+                padding: 0.25rem 0.5rem !important;
+            }
+
+            #menu-content .menu-section-body .space-y-2 > * + *,
+            #menu-content .menu-section-body > * + * {
+                margin-top: 0.05rem !important;
+            }
+
+            #menu-content .menu-section-body h3 {
+                font-size: 10pt !important;
+                margin-top: 0.2rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            #menu-content .menu-section-body .pl-6 {
+                padding-left: 1rem !important;
+            }
+
+            /* Preserve word spacing in flex lines */
+            #menu-content .menu-section-body .flex {
+                gap: 0.25em !important;
+            }
+
+            #menu-content .ingredient-badge {
+                font-weight: bold !important;
+                color: #000 !important;
+            }
+
+            #menu-content a {
+                color: #000 !important;
+                text-decoration: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-bg text-text">
+    <div class="viewport">
+        <nav class="nav-card relative">
+            <div class="px-3 lg:px-6 py-4 relative">
+                <div class="flex items-center justify-between flex-wrap gap-y-3">
+                    <a href="/recipes/index.html" class="order-1 hidden md:flex items-center space-x-2">
+                        <img src="/recipes/static/android-chrome-192x192.png" alt="Cook" class="brand-mark h-8 w-8 rounded-md" width="32" height="32">
+                    </a>
+
+                    <div class="relative z-50 order-2 flex-1 min-w-0 mr-2 md:ml-2 md:mr-4" id="search-container">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        
+                        <input type="text"
+                               id="search-input"
+                               
+                               placeholder="Search recipes..."
+                               aria-label="Search recipes"
+                               class="search-input">
+                        
+                        <div id="search-results"
+                             class="absolute top-full mt-2 w-full card shadow-[var(--shadow-overlay)] hidden max-h-96 overflow-y-auto"
+                             style="z-index: 9999;">
+                        </div>
+                    </div>
+
+                    <div class="order-3 flex items-center gap-1 lg:gap-2">
+                        
+                        <div class="hidden md:flex items-center gap-1 mr-2 lg:mr-4">
+                            <a href="/recipes/index.html"
+                               class="nav-pill active">
+                                Recipes
+                            </a>
+                            
+                            
+                        </div>
+                        
+                        <!-- Inline buttons on md+ screens -->
+                        
+                        <button onclick="showShortcutsHelp()" class="icon-btn hidden md:inline-flex ml-2 print:hidden" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                        <button onclick="toggleTheme()" class="icon-btn hidden md:inline-flex ml-2 print:hidden" aria-label="Toggle theme">
+                            <svg class="hidden dark:block" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg class="block dark:hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Overflow menu for small screens -->
+                        <div class="relative md:hidden ml-auto" id="more-menu-container">
+                            <button onclick="document.getElementById('more-dropdown').classList.toggle('hidden')" class="icon-btn" aria-label="More options">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                </svg>
+                            </button>
+                            <div id="more-dropdown" class="hidden absolute right-0 mt-2 w-56 card shadow-[var(--shadow-overlay)] z-50 py-1">
+                                
+                                <a href="/recipes/index.html" class="menu-item active">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 3.5h12a2 2 0 0 1 2 2V21H7a3 3 0 0 1-3-3V5a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 18a3 3 0 0 1 3-3h12M9 8h5M9 11h5"/>
+                                    </svg>
+                                    <span>Recipes</span>
+                                </a>
+                                
+                                
+                                <div class="border-t border-line my-1"></div>
+                                
+                                
+                                
+                                <button onclick="showShortcutsHelp(); document.getElementById('more-dropdown').classList.add('hidden');" class="menu-item">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>Keyboard Shortcuts</span>
+                                </button>
+                                <button onclick="toggleTheme(); document.getElementById('more-dropdown').classList.add('hidden');" class="menu-item">
+                                    <svg class="w-4 h-4 hidden dark:block" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+                                    <svg class="w-4 h-4 block dark:hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                                    <span>Toggle Theme</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Recipe","cookTime":"PT10M","name":"Lamb Doner","prepTime":"PT20M","recipeCategory":"Main","recipeCuisine":"Greek","recipeIngredient":["1/2 tsp bicarbonate of soda","black pepper (freshly ground)","40 g cabbage (shredded)","2 corn tortillas","50 g cucumber (thinly sliced)","pinch dried chilli flakes","1 tsp dried oregano","2 cloves garlic (finely grated)","2 tsp ground cumin","1 tsp ground paprika","hot sauce","175 g lamb leg meat (fat removed)","175 g lamb mince 20% fat","2 tbsp mint leaves (finely chopped)","1 tsp onion powder","6 pickled chillies","100 ml plain yoghurt 0% fat","1/2 red onion (thinly sliced)","pinch salt","1/2 tsp sea salt","pinch sugar","2 tomatoes (thinly sliced)"],"recipeInstructions":[{"@type":"HowToStep","text":"Preheat the oven to 220°C."},{"@type":"HowToStep","text":"Place all of the doner ingredients (lamb mince 20% fat, lamb leg meat, garlic, sea salt, bicarbonate of soda, ground cumin, ground paprika, onion powder, dried oregano, dried chilli flakes, and black pepper) into a food processor and pulse until smooth. Divide the mixture in half. Shape each portion into a ball and roll out between two large sheets of baking paper, until very thin. Remove the top sheet of baking paper from each piece of meat. Bake for 3 to 4 minutes until browned."},{"@type":"HowToStep","text":"Remove the trays from the oven and carefully use a blowtorch over the surface of the lamb until blackened in small areas. Leave to rest for a couple of minutes."},{"@type":"HowToStep","text":"Mix together the plain yoghurt 0% fat, mint leaves, sugar, and salt, and set aside."},{"@type":"HowToStep","text":"Warm the corn tortillas on the top shelf of the oven for 1 minute and place between two warmed plates."},{"@type":"HowToStep","text":"Slice the lamb into strips, about 2.5cm wide. Serve the lamb on the open tortillas and top with the serving ingredients (cabbage, cucumber, tomatoes, red onion, and pickled chillies), yoghurt sauce and hot sauce, if using. Fill generously until unable to wrap."}],"recipeYield":"2"}</script>
+<div>
+    <nav class="mb-4 breadcrumb print:hidden">
+        <ol class="flex items-center space-x-2 text-sm text-muted">
+            <li><a href="/recipes/index.html" class="hover:text-text">Recipes</a></li>
+            
+            <li class="flex items-center">
+                <span class="mx-2 text-faint">/</span>
+                
+                    <a href="/recipes/directory/Savoury.html" class="hover:text-text">Savoury</a>
+                
+            </li>
+            
+            <li class="flex items-center">
+                <span class="mx-2 text-faint">/</span>
+                
+                    <span class="text-text">Lamb Doner</span>
+                
+            </li>
+            
+        </ol>
+    </nav>
+
+    <div class="mb-8">
+        <!-- Recipe image if available -->
+        
+        
+
+        <!-- Title bar with scale and shopping list button -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 print:flex-row print:items-center">
+            <h1 class="text-display font-bold text-text print:text-2xl">
+                Lamb Doner
+            </h1>
+            
+            <div class="flex flex-wrap items-center gap-2 lg:gap-3 print:hidden">
+                
+                <button id="start-cooking-btn" onclick="startCookingMode()" class="btn btn-primary" title="Start Cooking">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="hidden lg:inline">Cook</span>
+                </button>
+                
+                <a href="/recipes/recipe/Savoury/Lamb Doner.cook" download class="btn" title="Download .cook source">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                    </svg>
+                    <span class="hidden lg:inline">.cook</span>
+                </a>
+                
+            </div>
+        </div>
+
+        <!-- Recipe info section -->
+        <div class="space-y-4">
+            <!-- Tags row -->
+            
+
+            
+
+            <!-- Description if present -->
+            
+            
+
+            <!-- Metadata row -->
+            <div id="metadata-container" class="flex flex-wrap gap-3">
+                
+                <span class="metadata-pill metadata-servings">👥 2 servings</span>
+                
+                
+                
+                
+                
+                
+
+                
+                
+
+                
+                <span class="metadata-pill metadata-difficulty">📊 Medium</span>
+                
+
+                
+                <span class="metadata-pill metadata-course">🍽️ Main</span>
+                
+
+                
+                <span class="metadata-pill metadata-prep">⏱️ Prep Time: 20m</span>
+                
+
+                
+                <span class="metadata-pill metadata-cook">🔥 Cook Time: 10m</span>
+                
+
+                
+                <span class="metadata-pill metadata-cuisine">🌍 Greek</span>
+                
+
+                
+                
+
+                
+                
+
+                
+                
+
+                
+                
+
+                <!-- Custom metadata -->
+                
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div id="recipe-body" class="grid md:grid-cols-3 gap-8 mb-8">
+        <div class="md:col-span-1">
+            <div class="card p-6">
+                <h2 class="text-title font-bold mb-4 text-accent-text">🥘 Ingredients</h2>
+                
+                <!-- Display ingredients grouped by section -->
+                
+                
+                
+                <h3 class="text-title font-semibold mt-4 mb-2 text-accent-text">Lamb Doner</h3>
+                
+                <ul class="ingredient-list space-y-3 mb-4">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">bicarbonate of soda</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1/2 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">black pepper</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: freshly ground">(freshly ground)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">dried chilli flakes</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            pinch
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">dried oregano</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">garlic</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: finely grated">(finely grated)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2 cloves
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">ground cumin</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">ground paprika</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">lamb leg meat</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: fat removed">(fat removed)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            175 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">lamb mince 20% fat</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            175 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">onion powder</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">sea salt</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1/2 tsp
+                            
+                        </span>
+                    </li>
+                    
+                </ul>
+                
+                
+                
+                
+                <h3 class="text-title font-semibold mt-4 mb-2 text-accent-text">Yoghurt Sauce</h3>
+                
+                <ul class="ingredient-list space-y-3 mb-4">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">mint leaves</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: finely chopped">(finely chopped)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2 tbsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">plain yoghurt 0% fat</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            100 ml
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">salt</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            pinch
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">sugar</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            pinch
+                            
+                        </span>
+                    </li>
+                    
+                </ul>
+                
+                
+                
+                
+                <h3 class="text-title font-semibold mt-4 mb-2 text-accent-text">Serve</h3>
+                
+                <ul class="ingredient-list space-y-3 ">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">cabbage</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: shredded">(shredded)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            40 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">corn tortillas</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">cucumber</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            50 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">hot sauce</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">pickled chillies</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            6
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">red onion</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1/2
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">tomatoes</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2
+                            
+                        </span>
+                    </li>
+                    
+                </ul>
+                
+                
+                
+
+                
+                <h2 class="text-title font-bold mt-6 mb-4 text-text">🍳 Cookware</h2>
+                <ul class="cookware-list ingredient-list space-y-2">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            <span class="font-medium">food processor</span>
+                            
+                            
+                        </div>
+                        
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            <span class="font-medium">blowtorch</span>
+                            
+                            
+                        </div>
+                        
+                    </li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="card p-6" data-recipe-path="Savoury/Lamb Doner">
+                
+                
+                <h2 class="text-title font-semibold mt-6 mb-4 text-accent-text border-b border-line pb-2">Lamb Doner</h2>
+                
+                <ol class="step-list space-y-4 ">
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Preheat the oven to 220°C.
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Place all of the doner ingredients (
+                                        <span class="ingredient-badge">lamb mince 20% fat</span>
+                                        , 
+                                        <span class="ingredient-badge">lamb leg meat</span>
+                                        , 
+                                        <span class="ingredient-badge">garlic</span>
+                                        , 
+                                        <span class="ingredient-badge">sea salt</span>
+                                        , 
+                                        <span class="ingredient-badge">bicarbonate of soda</span>
+                                        , 
+                                        <span class="ingredient-badge">ground cumin</span>
+                                        , 
+                                        <span class="ingredient-badge">ground paprika</span>
+                                        , 
+                                        <span class="ingredient-badge">onion powder</span>
+                                        , 
+                                        <span class="ingredient-badge">dried oregano</span>
+                                        , 
+                                        <span class="ingredient-badge">dried chilli flakes</span>
+                                        , and 
+                                        <span class="ingredient-badge">black pepper</span>
+                                        ) into a 
+                                        <span class="cookware-badge">food processor</span>
+                                         and pulse until smooth. Divide the mixture in half. Shape each portion into a ball and roll out between two large sheets of baking paper, until very thin. Remove the top sheet of baking paper from each piece of meat. Bake for 3 to 
+                                        <span class="timer-badge" data-timer data-timer-key="0-2-25" data-seconds="240" data-display="4 minutes" data-section="Lamb Doner" data-step="2" role="button" tabindex="0">⏱️ 4 minutes</span>
+                                         until browned.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            lamb mince 20% fat: 175 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            lamb leg meat: 175 g <span class="italic text-faint break-words" aria-label="preparation: fat removed">(fat removed)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            garlic: 2 cloves <span class="italic text-faint break-words" aria-label="preparation: finely grated">(finely grated)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            sea salt: 1/2 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            bicarbonate of soda: 1/2 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            ground cumin: 2 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            ground paprika: 1 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            onion powder: 1 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            dried oregano: 1 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            dried chilli flakes: pinch,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            black pepper <span class="italic text-faint break-words" aria-label="preparation: freshly ground">(freshly ground)</span>
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Remove the trays from the oven and carefully use a 
+                                        <span class="cookware-badge">blowtorch</span>
+                                         over the surface of the lamb until blackened in small areas. Leave to rest for a couple of minutes.
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                </ol>
+                
+                
+                <h2 class="text-title font-semibold mt-6 mb-4 text-accent-text border-b border-line pb-2">Yoghurt Sauce</h2>
+                
+                <ol class="step-list space-y-4 mt-4">
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Mix together the 
+                                        <span class="ingredient-badge">plain yoghurt 0% fat</span>
+                                        , 
+                                        <span class="ingredient-badge">mint leaves</span>
+                                        , 
+                                        <span class="ingredient-badge">sugar</span>
+                                        , and 
+                                        <span class="ingredient-badge">salt</span>
+                                        , and set aside.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            plain yoghurt 0% fat: 100 ml,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            mint leaves: 2 tbsp <span class="italic text-faint break-words" aria-label="preparation: finely chopped">(finely chopped)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            sugar: pinch,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            salt: pinch
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                </ol>
+                
+                
+                <h2 class="text-title font-semibold mt-6 mb-4 text-accent-text border-b border-line pb-2">Serve</h2>
+                
+                <ol class="step-list space-y-4 mt-4">
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Warm the 
+                                        <span class="ingredient-badge">corn tortillas</span>
+                                         on the top shelf of the oven for 
+                                        <span class="timer-badge" data-timer data-timer-key="2-1-3" data-seconds="60" data-display="1 minute" data-section="Serve" data-step="1" role="button" tabindex="0">⏱️ 1 minute</span>
+                                         and place between two warmed plates.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            corn tortillas: 2
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Slice the lamb into strips, about 2.5cm wide. Serve the lamb on the open tortillas and top with the serving ingredients (
+                                        <span class="ingredient-badge">cabbage</span>
+                                        , 
+                                        <span class="ingredient-badge">cucumber</span>
+                                        , 
+                                        <span class="ingredient-badge">tomatoes</span>
+                                        , 
+                                        <span class="ingredient-badge">red onion</span>
+                                        , and 
+                                        <span class="ingredient-badge">pickled chillies</span>
+                                        ), yoghurt sauce and 
+                                        <span class="ingredient-badge">hot sauce</span>
+                                        , if using. Fill generously until unable to wrap.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            cabbage: 40 g <span class="italic text-faint break-words" aria-label="preparation: shredded">(shredded)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            cucumber: 50 g <span class="italic text-faint break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            tomatoes: 2 <span class="italic text-faint break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            red onion: 1/2 <span class="italic text-faint break-words" aria-label="preparation: thinly sliced">(thinly sliced)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            pickled chillies: 6,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            hot sauce
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                </ol>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="cooking-mode-data" type="application/json">
+{"image":null,"name":"Lamb Doner","optionalLabel":"(optional)","scale":1.0,"sections":[{"ingredients":[{"name":"bicarbonate of soda","note":null,"optional":false,"quantity":"1/2","unit":"tsp"},{"name":"black pepper","note":"freshly ground","optional":false,"quantity":null,"unit":null},{"name":"dried chilli flakes","note":null,"optional":false,"quantity":"pinch","unit":null},{"name":"dried oregano","note":null,"optional":false,"quantity":"1","unit":"tsp"},{"name":"garlic","note":"finely grated","optional":false,"quantity":"2","unit":"cloves"},{"name":"ground cumin","note":null,"optional":false,"quantity":"2","unit":"tsp"},{"name":"ground paprika","note":null,"optional":false,"quantity":"1","unit":"tsp"},{"name":"lamb leg meat","note":"fat removed","optional":false,"quantity":"175","unit":"g"},{"name":"lamb mince 20% fat","note":null,"optional":false,"quantity":"175","unit":"g"},{"name":"onion powder","note":null,"optional":false,"quantity":"1","unit":"tsp"},{"name":"sea salt","note":null,"optional":false,"quantity":"1/2","unit":"tsp"}],"name":"Lamb Doner","stepOffset":0,"steps":[{"globalNumber":1,"image":null,"ingredients":[],"number":1,"type":"step"},{"globalNumber":2,"image":null,"ingredients":[{"name":"lamb mince 20% fat","note":null,"quantity":"175","unit":"g"},{"name":"lamb leg meat","note":"fat removed","quantity":"175","unit":"g"},{"name":"garlic","note":"finely grated","quantity":"2","unit":"cloves"},{"name":"sea salt","note":null,"quantity":"1/2","unit":"tsp"},{"name":"bicarbonate of soda","note":null,"quantity":"1/2","unit":"tsp"},{"name":"ground cumin","note":null,"quantity":"2","unit":"tsp"},{"name":"ground paprika","note":null,"quantity":"1","unit":"tsp"},{"name":"onion powder","note":null,"quantity":"1","unit":"tsp"},{"name":"dried oregano","note":null,"quantity":"1","unit":"tsp"},{"name":"dried chilli flakes","note":null,"quantity":"pinch","unit":null},{"name":"black pepper","note":"freshly ground","quantity":null,"unit":null}],"number":2,"type":"step"},{"globalNumber":3,"image":null,"ingredients":[],"number":3,"type":"step"}]},{"ingredients":[{"name":"mint leaves","note":"finely chopped","optional":false,"quantity":"2","unit":"tbsp"},{"name":"plain yoghurt 0% fat","note":null,"optional":false,"quantity":"100","unit":"ml"},{"name":"salt","note":null,"optional":false,"quantity":"pinch","unit":null},{"name":"sugar","note":null,"optional":false,"quantity":"pinch","unit":null}],"name":"Yoghurt Sauce","stepOffset":3,"steps":[{"globalNumber":4,"image":null,"ingredients":[{"name":"plain yoghurt 0% fat","note":null,"quantity":"100","unit":"ml"},{"name":"mint leaves","note":"finely chopped","quantity":"2","unit":"tbsp"},{"name":"sugar","note":null,"quantity":"pinch","unit":null},{"name":"salt","note":null,"quantity":"pinch","unit":null}],"number":1,"type":"step"}]},{"ingredients":[{"name":"cabbage","note":"shredded","optional":false,"quantity":"40","unit":"g"},{"name":"corn tortillas","note":null,"optional":false,"quantity":"2","unit":null},{"name":"cucumber","note":"thinly sliced","optional":false,"quantity":"50","unit":"g"},{"name":"hot sauce","note":null,"optional":false,"quantity":null,"unit":null},{"name":"pickled chillies","note":null,"optional":false,"quantity":"6","unit":null},{"name":"red onion","note":"thinly sliced","optional":false,"quantity":"1/2","unit":null},{"name":"tomatoes","note":"thinly sliced","optional":false,"quantity":"2","unit":null}],"name":"Serve","stepOffset":4,"steps":[{"globalNumber":5,"image":null,"ingredients":[{"name":"corn tortillas","note":null,"quantity":"2","unit":null}],"number":1,"type":"step"},{"globalNumber":6,"image":null,"ingredients":[{"name":"cabbage","note":"shredded","quantity":"40","unit":"g"},{"name":"cucumber","note":"thinly sliced","quantity":"50","unit":"g"},{"name":"tomatoes","note":"thinly sliced","quantity":"2","unit":null},{"name":"red onion","note":"thinly sliced","quantity":"1/2","unit":null},{"name":"pickled chillies","note":null,"quantity":"6","unit":null},{"name":"hot sauce","note":null,"quantity":null,"unit":null}],"number":2,"type":"step"}]}]}
+</script>
+
+
+
+        </main>
+
+        
+
+        
+        <footer class="mt-12 mb-6 text-center text-sm text-faint print:hidden">
+            Built with
+            <a href="https://cooklang.org/cli/" class="text-accent-text hover:underline" target="_blank" rel="noopener">CookCLI</a>
+            
+            &middot;
+            <a href="https://github.com/thoukydides/recipes" class="text-accent-text hover:underline" target="_blank" rel="noopener">View source</a>
+            
+        </footer>
+        
+    </div>
+
+    <script>
+        // Theme toggle function
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', newTheme);
+        }
+    </script>
+
+    
+    <script>window.__PREFIX__ = "/recipes";</script>
+    <script src="/recipes/static/js/search.js"></script>
+    
+
+    <!-- URL prefix for JavaScript -->
+    <script>
+        window.__PREFIX__ = "/recipes";
+        window.__STATIC_MODE__ = true;
+        window.__STRINGS__ = { close: "Close" };
+        // Bring the visitor back to this page after signing in.
+        document.querySelectorAll('[data-login-link]').forEach((link) => {
+            const prefix = window.__PREFIX__;
+            const path = location.pathname.startsWith(prefix)
+                ? location.pathname.slice(prefix.length)
+                : location.pathname;
+            if (path === '/login') return;
+            link.href = `${prefix}/login?next=${encodeURIComponent((path || '/') + location.search)}`;
+        });
+    </script>
+
+    <!-- Keyboard shortcuts -->
+    <script src="/recipes/static/js/keyboard-shortcuts.js"></script>
+    <!-- Expose showShortcutsHelp globally for the help button -->
+    <script>
+        // showShortcutsHelp is defined in keyboard-shortcuts.js
+        // This ensures it's available for the onclick handler
+        if (typeof showShortcutsHelp === 'undefined') {
+            window.showShortcutsHelp = function() {
+                console.warn('Keyboard shortcuts not loaded');
+            };
+        }
+    </script>
+
+    
+<link rel="stylesheet" href="/recipes/static/css/cooking-mode.css">
+<script src="/recipes/static/js/cooking-mode.js"></script>
+<script src="/recipes/static/js/timers.js"></script>
+
+</body>
+</html>

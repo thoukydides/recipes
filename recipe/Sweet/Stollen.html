@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en-US" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stollen - Cook</title>
+    <link rel="icon" type="image/x-icon" href="/recipes/static/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/recipes/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/recipes/static/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/recipes/static/apple-touch-icon.png">
+    <link rel="manifest" href="/recipes/static/site.webmanifest">
+    
+    <link href="/recipes/static/css/output.css" rel="stylesheet">
+    <script>
+        // Check for saved theme preference, or check for prefers-color-scheme, or default to light
+        const theme = localStorage.getItem('theme')
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        // False for a guest, or a role below shopper, on a server that requires signing in.
+        window.__CAN_EDIT_LISTS__ = true;
+        // `--recipes-only` and nobody signed in: no shopping list or pantry.
+        window.__RECIPES_ONLY__ = false;
+    </script>
+    
+    <style>
+        .viewport {
+            width: 100%;
+            max-width: 72rem;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Search result keyboard selection. --surface-sunk alone is barely
+           visible against --surface in dark mode, so the accent bar carries
+           the signal. */
+        #search-results a.search-selected {
+            background: var(--accent-soft);
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        @media print {
+            /* Token values are reset to light in input.css; this resets the
+               browser's own defaults so unstyled text is dark too. */
+            html.dark, html {
+                color-scheme: light !important;
+            }
+
+            * {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+
+            .viewport {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Hide navigation and non-essential elements */
+            nav, #search-container, #search-input, #search-results, .print\:hidden, .breadcrumb {
+                display: none !important;
+            }
+
+            /* Hide all navigation links */
+            a[href="/recipes/"] {
+                display: none !important;
+            }
+
+            /* Recipe layout for print: one column */
+            .grid {
+                display: block !important;
+            }
+
+            .md\:col-span-1, .md\:col-span-2 {
+                page-break-inside: avoid;
+                width: 100% !important;
+            }
+
+            /* Square corners on paper */
+            .card, .step-box, .ingredient-row, .recipe-note, .rounded-xl {
+                border-radius: 0 !important;
+            }
+
+            /* Step numbers */
+            .step-number {
+                background: #000 !important;
+                color: #fff !important;
+            }
+
+            /* Images */
+            img {
+                max-height: 300px !important;
+                max-width: 100% !important;
+                height: auto !important;
+                object-fit: contain !important;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+            }
+
+            /* Recipe sections on same page if possible */
+            h2, h3 {
+                page-break-after: avoid;
+            }
+
+            ol, ul {
+                page-break-inside: avoid;
+            }
+
+            /* Compact spacing */
+            .mb-8, .mb-6, .mb-4 {
+                margin-bottom: 0.5rem !important;
+            }
+
+            .p-6 {
+                padding: 0.5rem !important;
+            }
+
+            /* Recipe header */
+            h1 {
+                color: #000 !important;
+                font-size: 1.5rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Shopping list print styles */
+            .lg\:w-2\/5, .xl\:w-1\/3 {
+                display: none !important;
+            }
+
+            #shopping-list-results {
+                font-size: 11pt !important;
+                line-height: 1.2 !important;
+            }
+
+            #shopping-list-results input[type="checkbox"] {
+                display: none !important;
+            }
+
+            #shopping-list-results li .flex-1 {
+                width: auto !important;
+                flex: 1 1 0% !important;
+            }
+
+            #shopping-list-results label {
+                cursor: default !important;
+            }
+
+            #shopping-list-results h2 {
+                font-size: 11pt !important;
+                color: #000 !important;
+                margin-bottom: 0 !important;
+            }
+
+            #shopping-list-results .space-y-2 > * + *,
+            #shopping-list-results ul > * + * {
+                margin-top: 0 !important;
+            }
+
+            #shopping-list-results li {
+                padding: 0 !important;
+                line-height: 1.3 !important;
+                border-bottom: 1px dotted #ccc;
+            }
+
+            #shopping-list-results .card {
+                margin-bottom: 0.15rem !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+
+            /* Menu print styles */
+            #menu-content {
+                font-size: 10pt !important;
+                line-height: 1.4 !important;
+            }
+
+            #menu-content h1 {
+                font-size: 14pt !important;
+                margin-bottom: 0.25rem !important;
+                color: #000 !important;
+            }
+
+            #menu-content .space-y-6 > * + * {
+                margin-top: 0.3rem !important;
+            }
+
+            #menu-content .menu-section {
+                border: 1px solid #ccc !important;
+                border-radius: 0 !important;
+                page-break-inside: avoid;
+            }
+
+            #menu-content .menu-section-header {
+                background: #eee !important;
+                color: #000 !important;
+                padding: 0.15rem 0.5rem !important;
+            }
+
+            #menu-content .menu-section-header h2 {
+                font-size: 11pt !important;
+                color: #000 !important;
+            }
+
+            #menu-content .menu-section-body {
+                padding: 0.25rem 0.5rem !important;
+            }
+
+            #menu-content .menu-section-body .space-y-2 > * + *,
+            #menu-content .menu-section-body > * + * {
+                margin-top: 0.05rem !important;
+            }
+
+            #menu-content .menu-section-body h3 {
+                font-size: 10pt !important;
+                margin-top: 0.2rem !important;
+                margin-bottom: 0 !important;
+            }
+
+            #menu-content .menu-section-body .pl-6 {
+                padding-left: 1rem !important;
+            }
+
+            /* Preserve word spacing in flex lines */
+            #menu-content .menu-section-body .flex {
+                gap: 0.25em !important;
+            }
+
+            #menu-content .ingredient-badge {
+                font-weight: bold !important;
+                color: #000 !important;
+            }
+
+            #menu-content a {
+                color: #000 !important;
+                text-decoration: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-bg text-text">
+    <div class="viewport">
+        <nav class="nav-card relative">
+            <div class="px-3 lg:px-6 py-4 relative">
+                <div class="flex items-center justify-between flex-wrap gap-y-3">
+                    <a href="/recipes/index.html" class="order-1 hidden md:flex items-center space-x-2">
+                        <img src="/recipes/static/android-chrome-192x192.png" alt="Cook" class="brand-mark h-8 w-8 rounded-md" width="32" height="32">
+                    </a>
+
+                    <div class="relative z-50 order-2 flex-1 min-w-0 mr-2 md:ml-2 md:mr-4" id="search-container">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        
+                        <input type="text"
+                               id="search-input"
+                               
+                               placeholder="Search recipes..."
+                               aria-label="Search recipes"
+                               class="search-input">
+                        
+                        <div id="search-results"
+                             class="absolute top-full mt-2 w-full card shadow-[var(--shadow-overlay)] hidden max-h-96 overflow-y-auto"
+                             style="z-index: 9999;">
+                        </div>
+                    </div>
+
+                    <div class="order-3 flex items-center gap-1 lg:gap-2">
+                        
+                        <div class="hidden md:flex items-center gap-1 mr-2 lg:mr-4">
+                            <a href="/recipes/index.html"
+                               class="nav-pill active">
+                                Recipes
+                            </a>
+                            
+                            
+                        </div>
+                        
+                        <!-- Inline buttons on md+ screens -->
+                        
+                        <button onclick="showShortcutsHelp()" class="icon-btn hidden md:inline-flex ml-2 print:hidden" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                        <button onclick="toggleTheme()" class="icon-btn hidden md:inline-flex ml-2 print:hidden" aria-label="Toggle theme">
+                            <svg class="hidden dark:block" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg class="block dark:hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                            </svg>
+                        </button>
+                        
+                        <!-- Overflow menu for small screens -->
+                        <div class="relative md:hidden ml-auto" id="more-menu-container">
+                            <button onclick="document.getElementById('more-dropdown').classList.toggle('hidden')" class="icon-btn" aria-label="More options">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                </svg>
+                            </button>
+                            <div id="more-dropdown" class="hidden absolute right-0 mt-2 w-56 card shadow-[var(--shadow-overlay)] z-50 py-1">
+                                
+                                <a href="/recipes/index.html" class="menu-item active">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 3.5h12a2 2 0 0 1 2 2V21H7a3 3 0 0 1-3-3V5a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 18a3 3 0 0 1 3-3h12M9 8h5M9 11h5"/>
+                                    </svg>
+                                    <span>Recipes</span>
+                                </a>
+                                
+                                
+                                <div class="border-t border-line my-1"></div>
+                                
+                                
+                                
+                                <button onclick="showShortcutsHelp(); document.getElementById('more-dropdown').classList.add('hidden');" class="menu-item">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>Keyboard Shortcuts</span>
+                                </button>
+                                <button onclick="toggleTheme(); document.getElementById('more-dropdown').classList.add('hidden');" class="menu-item">
+                                    <svg class="w-4 h-4 hidden dark:block" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
+                                    <svg class="w-4 h-4 block dark:hidden" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                                    <span>Toggle Theme</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Recipe","name":"Stollen","recipeCategory":"Dessert","recipeCuisine":"German","recipeIngredient":["225 g Marzipan (preferably soft paste)","2 drops almond extract","55 g almonds, blanched (finely chopped)","125 g candied peel","100 g caster sugar","100 g currants","28 g fresh yeast (or 10 g dried yeast)","pinch ground cloves","pinch ground nutmeg","2 tbsp icing sugar","200 g raisins","10 g salt","500 g strong white flour","200 g unsalted butter (softened, melted, melted)","1/2 tsp vanilla extract","250 ml whole milk"],"recipeInstructions":[{"@type":"HowToStep","text":"Put the strong white flour and caster sugar in a large bowl. Add the fresh yeast on one side of the bowl and the salt on the other. Add the unsalted butter and 200ml of the whole milk and stir together."},{"@type":"HowToStep","text":"Add the remaining milk and bring the mixture together to form a soft dough. Transfer to a generously floured work surface and knead for 6 to 7 minutes, or until smooth and pliable."},{"@type":"HowToStep","text":"Mix the ground nutmeg, ground cloves, vanilla extract, almond extract, almonds, blanched, raisins, currants, and candied peel together in a large bowl. Put the dough on top and knead from the outside into the centre incorporating the dried fruit and spices. When everything has been fully incorporated, cover the bowl with cling film and leave to rise for 1 to 2 hours in a warm place, or until doubled in size."},{"@type":"HowToStep","text":"Line a baking tray with parchment."},{"@type":"HowToStep","text":"Flatten the dough and roll out on a lightly floured work surface into a rectangle about 35✕45cm (or so the short side of the dough matches the longest side of the baking tray). Brush with the unsalted butter."},{"@type":"HowToStep","text":"If the Marzipan is soft enough then spread it over the dough, leaving a gap at the bottom and top. Otherwise roll out the marzipan to about 35✕15cm (the long side should approximately match the width of the dough), and then place on top of the dough in the middle."},{"@type":"HowToStep","text":"Roll the dough up to enclose the marzipan and transfer to a baking tray lined with baking parchment. Cover and leave to rise for about 1 hour, or until risen and doubled in size."},{"@type":"HowToStep","text":"When the dough is risen, preheat the oven to 180°C and bake for 15 minutes."},{"@type":"HowToStep","text":"Reduce the heat to 130°C and bake for a further 45 minutes."},{"@type":"HowToStep","text":"Remove from the oven, brush with unsalted butter, and dust with icing sugar. Serve cold."}],"recipeYield":"12"}</script>
+<div>
+    <nav class="mb-4 breadcrumb print:hidden">
+        <ol class="flex items-center space-x-2 text-sm text-muted">
+            <li><a href="/recipes/index.html" class="hover:text-text">Recipes</a></li>
+            
+            <li class="flex items-center">
+                <span class="mx-2 text-faint">/</span>
+                
+                    <a href="/recipes/directory/Sweet.html" class="hover:text-text">Sweet</a>
+                
+            </li>
+            
+            <li class="flex items-center">
+                <span class="mx-2 text-faint">/</span>
+                
+                    <span class="text-text">Stollen</span>
+                
+            </li>
+            
+        </ol>
+    </nav>
+
+    <div class="mb-8">
+        <!-- Recipe image if available -->
+        
+        
+
+        <!-- Title bar with scale and shopping list button -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 print:flex-row print:items-center">
+            <h1 class="text-display font-bold text-text print:text-2xl">
+                Stollen
+            </h1>
+            
+            <div class="flex flex-wrap items-center gap-2 lg:gap-3 print:hidden">
+                
+                <button id="start-cooking-btn" onclick="startCookingMode()" class="btn btn-primary" title="Start Cooking">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="hidden lg:inline">Cook</span>
+                </button>
+                
+                <a href="/recipes/recipe/Sweet/Stollen.cook" download class="btn" title="Download .cook source">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"></path>
+                    </svg>
+                    <span class="hidden lg:inline">.cook</span>
+                </a>
+                
+            </div>
+        </div>
+
+        <!-- Recipe info section -->
+        <div class="space-y-4">
+            <!-- Tags row -->
+            
+
+            
+
+            <!-- Description if present -->
+            
+            
+
+            <!-- Metadata row -->
+            <div id="metadata-container" class="flex flex-wrap gap-3">
+                
+                <span class="metadata-pill metadata-servings">👥 12 servings</span>
+                
+                
+                
+                
+                
+                
+
+                
+                
+
+                
+                <span class="metadata-pill metadata-difficulty">📊 Hard</span>
+                
+
+                
+                <span class="metadata-pill metadata-course">🍽️ Dessert</span>
+                
+
+                
+                
+
+                
+                
+
+                
+                <span class="metadata-pill metadata-cuisine">🌍 German</span>
+                
+
+                
+                
+
+                
+                
+
+                
+                
+
+                
+                
+
+                <!-- Custom metadata -->
+                
+            </div>
+
+            
+        </div>
+    </div>
+
+    <div id="recipe-body" class="grid md:grid-cols-3 gap-8 mb-8">
+        <div class="md:col-span-1">
+            <div class="card p-6">
+                <h2 class="text-title font-bold mb-4 text-accent-text">🥘 Ingredients</h2>
+                
+                <!-- Display ingredients grouped by section -->
+                
+                
+                
+                
+                
+                <ul class="ingredient-list space-y-3 mb-4">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <a href="/recipes/recipe/Sweet/Marzipan.html" class="font-medium text-info hover:underline flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                </svg>
+                                Marzipan
+                            </a>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: preferably soft paste">(preferably soft paste)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            225 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">almond extract</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2 drops
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">almonds, blanched</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: finely chopped">(finely chopped)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            55 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">candied peel</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            125 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">caster sugar</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            100 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">currants</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            100 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">fresh yeast</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: or 10 g dried yeast">(or 10 g dried yeast)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            28 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">ground cloves</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            pinch
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">ground nutmeg</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            pinch
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">raisins</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            200 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">salt</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            10 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">strong white flour</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            500 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">unsalted butter</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: softened, melted">(softened, melted)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            175 g
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">vanilla extract</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            1/2 tsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">whole milk</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            250 ml
+                            
+                        </span>
+                    </li>
+                    
+                </ul>
+                
+                
+                
+                
+                <h3 class="text-title font-semibold mt-4 mb-2 text-accent-text">Serve</h3>
+                
+                <ul class="ingredient-list space-y-3 ">
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">icing sugar</span>
+                            
+                            
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            2 tbsp
+                            
+                        </span>
+                    </li>
+                    
+                    <li class="ingredient-row">
+                        <div class="flex-1 flex items-center">
+                            
+                            
+                            <span class="font-medium">unsalted butter</span>
+                            
+                            
+                            <span class="row-note italic ml-1 break-words" aria-label="preparation: melted">(melted)</span>
+                            
+                            
+                        </div>
+                        <span class="row-value ml-2">
+                            25 g
+                            
+                        </span>
+                    </li>
+                    
+                </ul>
+                
+                
+                
+
+                
+            </div>
+        </div>
+
+        <div class="md:col-span-2">
+            <div class="card p-6" data-recipe-path="Sweet/Stollen">
+                
+                
+                
+                <ol class="step-list space-y-4 ">
+                    
+                    
+                    <li class="recipe-note mb-3">
+                        <span>📝</span>
+                        <p class="m-0" style="white-space: pre-line">Tesco sell fresh yeast in multiples of 100 g.</p>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Put the  
+                                        <span class="ingredient-badge">strong white flour</span>
+                                         and 
+                                        <span class="ingredient-badge">caster sugar</span>
+                                         in a large bowl. Add the 
+                                        <span class="ingredient-badge">fresh yeast</span>
+                                         on one side of the bowl and the 
+                                        <span class="ingredient-badge">salt</span>
+                                         on the other. Add the 
+                                        <span class="ingredient-badge">unsalted butter</span>
+                                         and 200ml of the 
+                                        <span class="ingredient-badge">whole milk</span>
+                                         and stir together.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            strong white flour: 500 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            caster sugar: 100 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            fresh yeast: 28 g <span class="italic text-faint break-words" aria-label="preparation: or 10 g dried yeast">(or 10 g dried yeast)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            salt: 10 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            unsalted butter: 150 g <span class="italic text-faint break-words" aria-label="preparation: softened">(softened)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            whole milk: 250 ml
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">2</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Add the remaining milk and bring the mixture together to form a soft dough. Transfer to a generously floured work surface and knead for 6 to 
+                                        <span class="timer-badge" data-timer data-timer-key="0-2-1" data-seconds="420" data-display="7 minutes" data-section="" data-step="2" role="button" tabindex="0">⏱️ 7 minutes</span>
+                                        , or until smooth and pliable.
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">3</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Mix the 
+                                        <span class="ingredient-badge">ground nutmeg</span>
+                                        , 
+                                        <span class="ingredient-badge">ground cloves</span>
+                                        , 
+                                        <span class="ingredient-badge">vanilla extract</span>
+                                        , 
+                                        <span class="ingredient-badge">almond extract</span>
+                                        , 
+                                        <span class="ingredient-badge">almonds, blanched</span>
+                                        , 
+                                        <span class="ingredient-badge">raisins</span>
+                                        , 
+                                        <span class="ingredient-badge">currants</span>
+                                        , and 
+                                        <span class="ingredient-badge">candied peel</span>
+                                         together in a large bowl. Put the dough on top and knead from the outside into the centre incorporating the dried fruit and spices. When everything has been fully incorporated, cover the bowl with cling film and leave to rise for 1 to 
+                                        <span class="timer-badge" data-timer data-timer-key="0-3-17" data-seconds="7200" data-display="2 hours" data-section="" data-step="3" role="button" tabindex="0">⏱️ 2 hours</span>
+                                         in a warm place, or until doubled in size.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            ground nutmeg: pinch,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            ground cloves: pinch,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            vanilla extract: 1/2 tsp,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            almond extract: 2 drops,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            almonds, blanched: 55 g <span class="italic text-faint break-words" aria-label="preparation: finely chopped">(finely chopped)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            raisins: 200 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            currants: 100 g,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            candied peel: 125 g
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">4</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Line a baking tray with parchment.
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">5</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Flatten the dough and roll out on a lightly floured work surface into a rectangle about 35✕45cm (or so the short side of the dough matches the longest side of the baking tray). Brush with the 
+                                        <span class="ingredient-badge">unsalted butter</span>
+                                        .
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            unsalted butter: 25 g <span class="italic text-faint break-words" aria-label="preparation: melted">(melted)</span>
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">6</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        If the 
+                                        <a href="/recipes/recipe/Sweet/Marzipan.html" class="ingredient-badge hover:underline" title="View recipe: Marzipan">Marzipan</a>
+                                         is soft enough then spread it over the dough, leaving a gap at the bottom and top. Otherwise roll out the marzipan to about 35✕15cm (the long side should approximately match the width of the dough), and then place on top of the dough in the middle.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            Marzipan: 225 g <span class="italic text-faint break-words" aria-label="preparation: preferably soft paste">(preferably soft paste)</span>
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">7</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Roll the dough up to enclose the marzipan and transfer to a baking tray lined with baking parchment. Cover and leave to rise for about 
+                                        <span class="timer-badge" data-timer data-timer-key="0-7-1" data-seconds="3600" data-display="1 hour" data-section="" data-step="7" role="button" tabindex="0">⏱️ 1 hour</span>
+                                        , or until risen and doubled in size.
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">8</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        When the dough is risen, preheat the oven to 180°C and bake for 
+                                        <span class="timer-badge" data-timer data-timer-key="0-8-1" data-seconds="900" data-display="15 minutes" data-section="" data-step="8" role="button" tabindex="0">⏱️ 15 minutes</span>
+                                        .
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">9</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Reduce the heat to 130°C and bake for a further 
+                                        <span class="timer-badge" data-timer data-timer-key="0-9-1" data-seconds="2700" data-display="45 minutes" data-section="" data-step="9" role="button" tabindex="0">⏱️ 45 minutes</span>
+                                        .
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                </ol>
+                
+                
+                <h2 class="text-title font-semibold mt-6 mb-4 text-accent-text border-b border-line pb-2">Serve</h2>
+                
+                <ol class="step-list space-y-4 mt-4">
+                    
+                    
+                    <li class="step-box">
+                        <div class="flex flex-col gap-4">
+                            
+                            
+                            <div class="flex gap-4">
+                                <div class="step-number">1</div>
+                                <div class="flex-1">
+                                    <div class="step-body mb-2">
+                                        
+                                        Remove from the oven, brush with 
+                                        <span class="ingredient-badge">unsalted butter</span>
+                                        , and dust with 
+                                        <span class="ingredient-badge">icing sugar</span>
+                                        . Serve cold.
+                                    </div>
+                                    
+                                    <div class="step-refs">
+                                        
+                                        <span class="inline-block mr-3">
+                                            unsalted butter: 25 g <span class="italic text-faint break-words" aria-label="preparation: melted">(melted)</span>,
+                                        </span>
+                                        
+                                        <span class="inline-block mr-3">
+                                            icing sugar: 2 tbsp
+                                        </span>
+                                        
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </li>
+                    
+                    
+                </ol>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="cooking-mode-data" type="application/json">
+{"image":null,"name":"Stollen","optionalLabel":"(optional)","scale":1.0,"sections":[{"ingredients":[{"name":"Marzipan","note":"preferably soft paste","optional":false,"quantity":"225","unit":"g"},{"name":"almond extract","note":null,"optional":false,"quantity":"2","unit":"drops"},{"name":"almonds, blanched","note":"finely chopped","optional":false,"quantity":"55","unit":"g"},{"name":"candied peel","note":null,"optional":false,"quantity":"125","unit":"g"},{"name":"caster sugar","note":null,"optional":false,"quantity":"100","unit":"g"},{"name":"currants","note":null,"optional":false,"quantity":"100","unit":"g"},{"name":"fresh yeast","note":"or 10 g dried yeast","optional":false,"quantity":"28","unit":"g"},{"name":"ground cloves","note":null,"optional":false,"quantity":"pinch","unit":null},{"name":"ground nutmeg","note":null,"optional":false,"quantity":"pinch","unit":null},{"name":"raisins","note":null,"optional":false,"quantity":"200","unit":"g"},{"name":"salt","note":null,"optional":false,"quantity":"10","unit":"g"},{"name":"strong white flour","note":null,"optional":false,"quantity":"500","unit":"g"},{"name":"unsalted butter","note":"softened","optional":false,"quantity":"150","unit":"g"},{"name":"unsalted butter","note":"melted","optional":false,"quantity":"25","unit":"g"},{"name":"vanilla extract","note":null,"optional":false,"quantity":"1/2","unit":"tsp"},{"name":"whole milk","note":null,"optional":false,"quantity":"250","unit":"ml"}],"name":null,"stepOffset":0,"steps":[{"globalNumber":1,"image":null,"ingredients":[{"name":"strong white flour","note":null,"quantity":"500","unit":"g"},{"name":"caster sugar","note":null,"quantity":"100","unit":"g"},{"name":"fresh yeast","note":"or 10 g dried yeast","quantity":"28","unit":"g"},{"name":"salt","note":null,"quantity":"10","unit":"g"},{"name":"unsalted butter","note":"softened","quantity":"150","unit":"g"},{"name":"whole milk","note":null,"quantity":"250","unit":"ml"}],"number":1,"type":"step"},{"globalNumber":2,"image":null,"ingredients":[],"number":2,"type":"step"},{"globalNumber":3,"image":null,"ingredients":[{"name":"ground nutmeg","note":null,"quantity":"pinch","unit":null},{"name":"ground cloves","note":null,"quantity":"pinch","unit":null},{"name":"vanilla extract","note":null,"quantity":"1/2","unit":"tsp"},{"name":"almond extract","note":null,"quantity":"2","unit":"drops"},{"name":"almonds, blanched","note":"finely chopped","quantity":"55","unit":"g"},{"name":"raisins","note":null,"quantity":"200","unit":"g"},{"name":"currants","note":null,"quantity":"100","unit":"g"},{"name":"candied peel","note":null,"quantity":"125","unit":"g"}],"number":3,"type":"step"},{"globalNumber":4,"image":null,"ingredients":[],"number":4,"type":"step"},{"globalNumber":5,"image":null,"ingredients":[{"name":"unsalted butter","note":"melted","quantity":"25","unit":"g"}],"number":5,"type":"step"},{"globalNumber":6,"image":null,"ingredients":[{"name":"Marzipan","note":"preferably soft paste","quantity":"225","unit":"g"}],"number":6,"type":"step"},{"globalNumber":7,"image":null,"ingredients":[],"number":7,"type":"step"},{"globalNumber":8,"image":null,"ingredients":[],"number":8,"type":"step"},{"globalNumber":9,"image":null,"ingredients":[],"number":9,"type":"step"}]},{"ingredients":[{"name":"icing sugar","note":null,"optional":false,"quantity":"2","unit":"tbsp"},{"name":"unsalted butter","note":"melted","optional":false,"quantity":"25","unit":"g"}],"name":"Serve","stepOffset":9,"steps":[{"globalNumber":10,"image":null,"ingredients":[{"name":"unsalted butter","note":"melted","quantity":"25","unit":"g"},{"name":"icing sugar","note":null,"quantity":"2","unit":"tbsp"}],"number":1,"type":"step"}]}]}
+</script>
+
+
+
+        </main>
+
+        
+
+        
+        <footer class="mt-12 mb-6 text-center text-sm text-faint print:hidden">
+            Built with
+            <a href="https://cooklang.org/cli/" class="text-accent-text hover:underline" target="_blank" rel="noopener">CookCLI</a>
+            
+            &middot;
+            <a href="https://github.com/thoukydides/recipes" class="text-accent-text hover:underline" target="_blank" rel="noopener">View source</a>
+            
+        </footer>
+        
+    </div>
+
+    <script>
+        // Theme toggle function
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', newTheme);
+        }
+    </script>
+
+    
+    <script>window.__PREFIX__ = "/recipes";</script>
+    <script src="/recipes/static/js/search.js"></script>
+    
+
+    <!-- URL prefix for JavaScript -->
+    <script>
+        window.__PREFIX__ = "/recipes";
+        window.__STATIC_MODE__ = true;
+        window.__STRINGS__ = { close: "Close" };
+        // Bring the visitor back to this page after signing in.
+        document.querySelectorAll('[data-login-link]').forEach((link) => {
+            const prefix = window.__PREFIX__;
+            const path = location.pathname.startsWith(prefix)
+                ? location.pathname.slice(prefix.length)
+                : location.pathname;
+            if (path === '/login') return;
+            link.href = `${prefix}/login?next=${encodeURIComponent((path || '/') + location.search)}`;
+        });
+    </script>
+
+    <!-- Keyboard shortcuts -->
+    <script src="/recipes/static/js/keyboard-shortcuts.js"></script>
+    <!-- Expose showShortcutsHelp globally for the help button -->
+    <script>
+        // showShortcutsHelp is defined in keyboard-shortcuts.js
+        // This ensures it's available for the onclick handler
+        if (typeof showShortcutsHelp === 'undefined') {
+            window.showShortcutsHelp = function() {
+                console.warn('Keyboard shortcuts not loaded');
+            };
+        }
+    </script>
+
+    
+<link rel="stylesheet" href="/recipes/static/css/cooking-mode.css">
+<script src="/recipes/static/js/cooking-mode.js"></script>
+<script src="/recipes/static/js/timers.js"></script>
+
+</body>
+</html>
