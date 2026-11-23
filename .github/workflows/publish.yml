@@ -1,0 +1,31 @@
+name: Publish recipes
+permissions:
+  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install CookCLI
+        run: |
+          VERSION=$(curl -sIL -o /dev/null -w '%{url_effective}' https://github.com/cooklang/cookcli/releases/latest | sed 's|.*/tag/v||')
+          curl -L "https://github.com/cooklang/cookcli/releases/download/v$VERSION/cook-$VERSION-linux-x86_64-gnu.tar.gz" | tar xz
+          sudo install -m 755 cook /usr/local/bin/cook
+
+      - name: Build site
+        run: cook build web --base-url /recipes/ --repo-url "https://github.com/${{ github.repository }}"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
