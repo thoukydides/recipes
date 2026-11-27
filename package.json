@@ -1,0 +1,46 @@
+{
+    "name": "recipes",
+    "version": "1.0.0",
+    "description": "Thouky's Recipes",
+    "keywords": [
+        "cooking",
+        "cooklang",
+        "food",
+        "recipes"
+    ],
+    "homepage": "https://github.com/thoukydides/recipes#readme",
+    "bugs": {
+        "url": "https://github.com/thoukydides/recipes/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thoukydides/recipes.git"
+    },
+    "author": {
+        "name": "Alexander Thoukydides",
+        "url": "https://www.thouky.co.uk/"
+    },
+    "type": "module",
+    "dependencies": {
+        "@cooklang/cooklang": "^0.20.0",
+        "@eslint/eslintrc": "^3.3.7",
+        "@eslint/js": "^10.0.1",
+        "@tsconfig/node22": "^22.0.7",
+        "@types/eslint__js": "^8.42.3",
+        "@types/node": "^22.20.7",
+        "eslint": "^10.15.0",
+        "globals": "^17.14.0",
+        "tsx": "^4.23.15",
+        "typescript-eslint": "^8.74.0"
+    },
+    "overrides": {
+        "typescript-eslint": {
+            "typescript": "^6.0.0"
+        }
+    },
+    "scripts": {
+        "validate": "cook doctor validate",
+        "check-metadata": "NODE_NO_WARNINGS=1 tsx bin/check-metadata.ts",
+        "lint": "eslint eslint.config.mjs 'bin/**/*.ts'"
+    }
+}
